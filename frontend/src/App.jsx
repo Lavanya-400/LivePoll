@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 
+const API_URL = "https://livepoll-rv54.onrender.com";
+
 function App() {
   const [showForm, setShowForm] = useState(false);
   const [question, setQuestion] = useState("");
@@ -17,7 +19,6 @@ function App() {
 
     if (path.startsWith("/poll/")) {
       const pollId = path.split("/")[2];
-
       fetchPoll(pollId);
     }
   }, []);
@@ -25,7 +26,7 @@ function App() {
   const fetchPoll = async (pollId) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/polls/${pollId}`
+        `${API_URL}/api/polls/${pollId}`
       );
 
       const data = await response.json();
@@ -63,7 +64,7 @@ function App() {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/polls", {
+      const response = await fetch(`${API_URL}/api/polls`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,7 +99,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/api/polls/${pollId}/vote`,
+        `${API_URL}/api/polls/${pollId}/vote`,
         {
           method: "POST",
           headers: {
@@ -155,7 +156,8 @@ function App() {
                 onChange={() => setSelectedOption(index)}
               />
 
-              {" "}{option}
+              {" "}
+              {option}
             </label>
           ))}
 
@@ -232,12 +234,16 @@ function App() {
 
             <div className="feature-card">
               <h3>🔗 Share Easily</h3>
-              <p>Share your poll with your audience using a simple link.</p>
+              <p>
+                Share your poll with your audience using a simple link.
+              </p>
             </div>
 
             <div className="feature-card">
               <h3>📊 Live Results</h3>
-              <p>See voting results update in real time without refreshing.</p>
+              <p>
+                See voting results update in real time without refreshing.
+              </p>
             </div>
           </section>
         </>
@@ -262,7 +268,9 @@ function App() {
               type="text"
               placeholder={`Option ${index + 1}`}
               value={option}
-              onChange={(e) => updateOption(index, e.target.value)}
+              onChange={(e) =>
+                updateOption(index, e.target.value)
+              }
             />
           ))}
 
@@ -270,7 +278,10 @@ function App() {
             + Add Option
           </button>
 
-          <button className="submit-poll-btn" onClick={createPoll}>
+          <button
+            className="submit-poll-btn"
+            onClick={createPoll}
+          >
             Create Poll
           </button>
 
