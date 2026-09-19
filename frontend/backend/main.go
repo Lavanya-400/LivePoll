@@ -40,9 +40,9 @@ func main() {
 		println("Warning: .env file not found")
 	}
 
+	// MongoDB
 	mongoURI := os.Getenv("MONGODB_URI")
 
-	// If MongoDB is available, connect.
 	var collection *mongo.Collection
 
 	if mongoURI != "" {
@@ -52,7 +52,8 @@ func main() {
 		)
 
 		if err != nil {
-			println("MongoDB connection failed. Running in temporary memory mode.")
+			println("MongoDB connection failed.")
+			println("Running in temporary memory mode.")
 		} else {
 
 			ctx, cancel := context.WithTimeout(
@@ -79,12 +80,15 @@ func main() {
 
 	router := gin.Default()
 
+	// -----------------------------------------
 	// CORS
+	// -----------------------------------------
+
 	router.Use(func(c *gin.Context) {
 
 		c.Writer.Header().Set(
 			"Access-Control-Allow-Origin",
-			"http://localhost:5173",
+			"*",
 		)
 
 		c.Writer.Header().Set(
@@ -94,7 +98,7 @@ func main() {
 
 		c.Writer.Header().Set(
 			"Access-Control-Allow-Headers",
-			"Content-Type",
+			"Origin, Content-Type, Accept",
 		)
 
 		if c.Request.Method == "OPTIONS" {
@@ -176,11 +180,23 @@ func main() {
 			}
 		}
 
+		// Create share URL
+		origin := c.GetHeader("Origin")
+
+		if origin == "" {
+			origin = os.Getenv("FRONTEND_URL")
+		}
+
+		if origin == "" {
+			origin = "http://localhost:5173"
+		}
+
+		shareURL := origin + "/poll/" + poll.ID.Hex()
+
 		c.JSON(http.StatusCreated, gin.H{
-			"message": "Poll created successfully!",
-			"poll":    poll,
-			"shareUrl": "http://localhost:5173/poll/" +
-				poll.ID.Hex(),
+			"message":  "Poll created successfully!",
+			"poll":     poll,
+			"shareUrl": shareURL,
 		})
 	})
 
@@ -360,9 +376,15 @@ func main() {
 	// START SERVER
 	// -----------------------------------------
 
-	println("LivePoll backend starting on port 8080...")
+	port := os.Getenv("PORT")
 
-	err = router.Run(":8080")
+	if port == "" {
+		port = "8080"
+	}
+
+	println("LivePoll backend starting on port " + port + "...")
+
+	err = router.Run(":" + port)
 
 	if err != nil {
 		panic(err)
